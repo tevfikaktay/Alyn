@@ -135,3 +135,32 @@ In some cases the result image might be upside down or the text may be running v
 	./deskew.py -i image.jpg -o rotated.jpg -r 90
 
 To generate data for experimental purposes, run the test_img_gen.py in test_data folder. This will generate images containing a white line having angle between 0 to 180 degrees.
+
+
+### This fork includes
+
+* Python3 support
+* reading PIL image as the 'input_file' parameter 
+* exporting throughput as numpy array
+
+Example:
+
+```python
+from alyn import Deskew
+from PIL import Image
+import matplotlib.pyplot as plt 
+
+# import one of the image using pillow from repository
+img = Image.open('type your image path here')  
+
+deskew_obj = Deskew(
+        input_file=img,
+        r_angle=0,
+        display_image=False,
+        output_file=None)
+
+deskew_obj.run()
+plt.imshow(deskew_obj.rotated)
+plt.show()
+
+```

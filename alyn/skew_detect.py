@@ -6,6 +6,7 @@ import optparse
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import io
+from PIL import Image
 from skimage.feature import canny
 from skimage.color import rgb2gray
 from skimage.transform import hough_line, hough_line_peaks
@@ -77,7 +78,7 @@ class SkewDetect:
     def display(self, data):
 
         for i in data:
-            print i + ": " + str(data[i])
+            print(i + ": " + str(data[i]))
 
     def calculate_deviation(self, angle):
 
@@ -104,13 +105,14 @@ class SkewDetect:
             if self.batch_path:
                 self.batch_process()
             else:
-                print "Invalid input, nothing to process."
+                print("Invalid input, nothing to process.")
         else:
             self.process_single_file()
 
     def check_path(self, path):
-
-        if os.path.isabs(path):
+        if isinstance(path, Image.Image):
+            full_path = path
+        elif os.path.isabs(path):
             full_path = path
         else:
             full_path = os.getcwd() + '/' + str(path)
@@ -155,8 +157,12 @@ class SkewDetect:
             wfile.close()
 
     def determine_skew(self, img_file):
-
-        img = io.imread(img_file, as_grey=True)
+        # check if the input is a PIL image , skip imread
+        if isinstance(img_file, Image.Image):
+            img = img_file.convert('L')  # Convert to grayscale
+            img = np.array(img)
+        else:
+            img = io.imread(img_file, as_gray=True)
         edges = canny(img, sigma=self.sigma)
         h, a, d = hough_line(edges)
         _, ap, _ = hough_line_peaks(h, a, d, num_peaks=self.num_peaks)
