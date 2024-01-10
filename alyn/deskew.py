@@ -3,9 +3,10 @@ import optparse
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skew_detect import SkewDetect
+from .skew_detect import SkewDetect
 from skimage import io
 from skimage.transform import rotate
+from PIL import Image 
 
 
 class Deskew:
@@ -17,10 +18,14 @@ class Deskew:
         self.output_file = output_file
         self.r_angle = r_angle
         self.skew_obj = SkewDetect(self.input_file)
+        self.rotated = None
 
     def deskew(self):
-
-        img = io.imread(self.input_file)
+        # check if self.input_file is a PIL image file, if so, convert to numpy array
+        if isinstance(self.input_file, Image.Image):
+            img = np.array(self.input_file)
+        else:
+            img = io.imread(self.input_file)
         res = self.skew_obj.process_single_file()
         angle = res['Estimated Angle']
 
@@ -31,13 +36,13 @@ class Deskew:
         if angle >= -90 and angle < -45:
             rot_angle = 90 + angle + self.r_angle
 
-        rotated = rotate(img, rot_angle, resize=True)
+        self.rotated = rotate(img, rot_angle, resize=True)
 
         if self.display_image:
-            self.display(rotated)
+            self.display(self.rotated)
 
         if self.output_file:
-            self.saveImage(rotated*255)
+            self.saveImage(self.rotated*255)
 
     def saveImage(self, img):
         path = self.skew_obj.check_path(self.output_file)
